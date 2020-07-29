@@ -14,11 +14,9 @@ usage: nauticock [-h] [-v] [-s location] [-c location] [-t token]
 optional arguments:
   -v, --version         show program's version number and exit
   -s location, --storage-dir location
-                        storage directory for persistent data. Default is set
-                        to "/home/yiyao/.cache/nauticock"
+                        storage directory for persistent data.
   -c location, --config-dir location
-                        config directory for module. Default is set to
-                        "/home/yiyao/.config/nauticock"
+                        config directory for module.
   -t token, --api-key token
                         API token required by discord. Setting this overrides
                         the token specified in the config
