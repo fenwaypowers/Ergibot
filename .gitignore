@@ -1,0 +1,16 @@
+*/__pycache__/
+*.pyc
+*.pyo
+*.class
+*~
+*.DS_Store
+wine-py2exe/
+py2exe.log
+*.kate-swp
+*.swp
+tmp/
+build/
+venv/
+.idea/
+*.iml
+.vscode/
