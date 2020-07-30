@@ -1,20 +1,25 @@
 '''Module for helper functions'''
 import sys
+import datetime
+
+
+def iso8601_now():
+    return datetime.datetime.now().replace(microsecond=0).isoformat()
 
 
 def print_error(msg, module='core', stream=sys.stdout, **kwargs):
     '''Logs a message as an error'''
-    print(f'[{module}/error] {msg}', file=stream, **kwargs)
+    print(f'[{iso8601_now()}][{module}/error] {msg}', file=stream, **kwargs)
 
 
 def print_warn(msg, module='core', stream=sys.stdout, **kwargs):
     '''Logs a message as a warning'''
-    print(f'[{module}/warn] {msg}', file=stream, **kwargs)
+    print(f'[{iso8601_now()}][{module}/warn] {msg}', file=stream, **kwargs)
 
 
 def print_info(msg, module='core', stream=sys.stdout, **kwargs):
     '''Logs a message as an info'''
-    print(f'[{module}/info] {msg}', file=stream, **kwargs)
+    print(f'[{iso8601_now()}][{module}/info] {msg}', file=stream, **kwargs)
 
 
 class NauticockError(Exception):

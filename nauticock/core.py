@@ -43,6 +43,7 @@ class Nauticock(Bot):
         init_plugins(self)
         self.init_params = init_params
         self.config.flush_all()
+        self.storage.flush_all()
 
         def on_sig(self):
             print_info(('Writing changes to disk.'))
