@@ -11,7 +11,7 @@ def write_to_file(data, fpath):
     '''Writes data to filepath'''
     try:
         with open(fpath, 'w') as outfile:
-            json.dump(data, outfile, indent=4, sort_keys=True)
+            json.dump(data, outfile, indent=4)
     except OSError as err:
         raise NauticockError(f'Failed to write to file: "{fpath}"') from err
 

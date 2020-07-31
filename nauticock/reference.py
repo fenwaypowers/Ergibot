@@ -4,7 +4,7 @@ Package-level static constants
 import os
 
 # Increment on update
-VERSION = 0
+VERSION = 1
 PKGNAME = 'nauticock'
 
 # Change this when modifying how plugins are handled
