@@ -1,10 +1,10 @@
 '''
-Basic plugin that assigns users to role on reaction
+Basic plugin that assigns users to pronoun roles on reaction
 
 Usage:
-Add reaction monitor: /r2radd <msg_id> <emoji> <role_id>
-Delete reaction monitor: /r2rdel <msg_id> <emoji>
-Show all reaction monitors: /r2rlist
+Add reaction monitor: /r2padd <msg_id> <emoji> <role_id>
+Delete reaction monitor: /r2pdel <msg_id> <emoji>
+Show all reaction monitors: /r2plist
 
 This plugin requires admin permissions
 '''
@@ -17,10 +17,10 @@ from discord.ext.commands.errors import MissingRequiredArgument, BadArgument
 from .common import BasicPlugin
 
 
-class React2Role(BasicPlugin):
-    '''Cog that implements react2role'''
+class React2Pronoun(BasicPlugin):
+    '''Cog that implements react2pronoun'''
 
-    plugin_name = 'react2role'
+    plugin_name = 'react2pronoun'
     plugin_api_ver = 0
 
     def __init__(self, bot):
@@ -41,7 +41,7 @@ class React2Role(BasicPlugin):
         self.reactions = self.get_storage_var('reactions', [])
 
     async def cog_command_error(self, ctx, err):
-        '''Show usage on user error for r2radd and r2rdel, otherwise raise'''
+        '''Show usage on user error for r2padd and r2pdel, otherwise raise'''
         # Ignore self invoke
         if ctx.author == self.bot.user:
             return
@@ -49,21 +49,21 @@ class React2Role(BasicPlugin):
         if not ctx.author.guild_permissions.administrator:
             return
 
-        if ctx.command.name == 'r2radd' and (
+        if ctx.command.name == 'r2padd' and (
                 isinstance(err, MissingRequiredArgument)
                 or isinstance(err, BadArgument)):
             await ctx.channel.send(
-                '```Usage: /r2radd <msg_id> <emoji> <role_id>```')
-        elif ctx.command.name == 'r2rdel' and (
+                '```Usage: /r2padd <msg_id> <emoji> <role_id>```')
+        elif ctx.command.name == 'r2pdel' and (
                 isinstance(err, MissingRequiredArgument)
                 or isinstance(err, BadArgument)):
             await ctx.channel.send(
-                '```Usage: /r2rdel <msg_id> <emoji>```')
+                '```Usage: /r2pdel <msg_id> <emoji>```')
         else:
             raise err
 
     @commands.command()
-    async def r2radd(self, ctx, msg_id: int, emoji, role: int):
+    async def r2padd(self, ctx, msg_id: int, emoji, role: int):
         '''Used to add a reaction monitor'''
         # Ignore self invoke
         if ctx.author == self.bot.user:
@@ -110,7 +110,7 @@ class React2Role(BasicPlugin):
              'permissions to see the message'))
 
     @commands.command()
-    async def r2rdel(self, ctx, msg_id: int, emoji):
+    async def r2pdel(self, ctx, msg_id: int, emoji):
         '''Used to delete a reaction monitor'''
         # Ignore self invoke
         if ctx.author == self.bot.user:
@@ -137,7 +137,7 @@ class React2Role(BasicPlugin):
         await ctx.channel.send('Reaction monitor does not exist')
 
     @commands.command()
-    async def r2rlist(self, ctx):
+    async def r2plist(self, ctx):
         '''Used to list all reaction monitors'''
         # Ignore self invoke
         if ctx.author == self.bot.user:
@@ -147,7 +147,7 @@ class React2Role(BasicPlugin):
             return
 
         # Try to keep discord calls to a minimum, so group the message
-        response = 'react2role monitored reactions:\n```'
+        response = 'react2pronoun monitored reactions:\n```'
         for reaction in self.reactions:
             # Only print stuff in the current guild
             if reaction['guild_id'] != ctx.guild.id:
@@ -176,30 +176,15 @@ class React2Role(BasicPlugin):
             if self.settings['ignore-admin'] \
                     and member.guild_permissions.administrator:
                 self.log_info(f'Ignoring admin {member.name}')
-            # If the proper config is set then ignore roles
-            elif self.settings['ignore-role'] and len(member.roles) > 1:
-                self.log_info(f'{member.name} already has a role, skipping')
-            # Restore stuff in the restore dict instead of giving a new role
-            elif self.settings['restore'] \
-                    and str(event.user_id) in reaction['restore'].keys():
-                role_ids = reaction['restore'][str(event.user_id)]
-                roles = []
-                for role_id in role_ids:
-                    role = guild.get_role(role_id)
-                    if role:
-                        roles.append(role)
-                if roles:
-                    self.log_info(f'Restoring {roles} to {member.name}')
-                    await member.add_roles(*roles, reason='react2role restore')
-                    reaction['restore'].pop(str(event.user_id))
-                    self.mark_plugin_storage_dirty()
-                    self.flush_storage()
+            # Also ignore unprivileged users
+            if not member.guild_permissions.send_messages:
+                self.log_info('Ignoring unprivilaged user {member.name}')
             # Add the new role
             else:
                 role = guild.get_role(reaction['role_id'])
                 if role:
                     self.log_info(f'Adding role {role.name} to {member.name}')
-                    await member.add_roles(role, reason='react2role')
+                    await member.add_roles(role, reason='react2pronoun')
             return
 
     @commands.Cog.listener()
@@ -213,22 +198,17 @@ class React2Role(BasicPlugin):
 
             guild = self.bot.get_guild(event.guild_id)
             member = guild.get_member(event.user_id)
+            role = guild.get_role(reaction['role_id'])
 
             # Ignore admin reacts
             if self.settings['ignore-admin'] \
                     and member.guild_permissions.administrator:
                 self.log_info(f'Ignoring admin {member.name}')
-            # Revoke current roles if config is set
-            elif self.settings['revoke'] and len(member.roles) > 1:
-                roles = []
-                role_ids = []
-                for role in member.roles:
-                    if role != guild.default_role:
-                        roles.append(role)
-                        role_ids.append(role.id)
-                self.log_info(f'Revoking {roles} from {member.name}')
-                await member.remove_roles(*roles, reason='react2role revoke')
-                reaction['restore'][str(event.user_id)] = role_ids
-                self.mark_plugin_storage_dirty()
-                self.flush_storage()
+	    # Ignore if the user does not have this pronoun role
+            elif role not in member.roles:
+                self.log_info(f'{member.name} does not have role {role.name}')
+            # Revoke the pronoun
+            else:
+                self.log_info(f'Revoking {role.name} from {member.name}')
+                await member.remove_roles(role, reason='react2pronoun revoke')
             return
