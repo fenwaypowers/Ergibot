@@ -177,7 +177,7 @@ class React2Pronoun(BasicPlugin):
                     and member.guild_permissions.administrator:
                 self.log_info(f'Ignoring admin {member.name}')
             # Also ignore unprivileged users
-            if not member.guild_permissions.send_messages:
+            elif not member.guild_permissions.send_messages:
                 self.log_info('Ignoring unprivilaged user {member.name}')
             # Add the new role
             else:
