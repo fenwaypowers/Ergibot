@@ -27,10 +27,10 @@ class Admin(commands.Cog):
     
     @nextcord.slash_command(name = "botsay", description = "Make the bot send a message", guild_ids=serverIdList)
     async def botsay(self, interaction: Interaction, msg:str, channel_id:str):
-        channel_str = channel
+        channel_str = channel_id
         role = get(interaction.user.roles, name=self.ROLE_FOR_ADMIN_PERMS)
         if role in interaction.user.roles:
-            channel = self.client.get_channel(int(channel))
+            channel = self.client.get_channel(int(channel_id))
             await channel.send(msg)
             await interaction.response.send_message("Message \"" + msg + "\" has been sent to channel " + channel_str + ".")
         else:
