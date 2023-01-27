@@ -2,6 +2,8 @@
 
 Updated for 2023 with new slash commands, using [nextcord](https://github.com/nextcord/nextcord) for the API.
 
+![The Nauticock](https://github.com/CIF-Rochester/NauticockBot/raw/master/TheNauticock.png)
+
 ## Prerequisites:
 * [Python 3.10+](https://www.python.org/)
 * [nextcord](https://pypi.org/project/nextcord/)
