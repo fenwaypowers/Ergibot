@@ -27,10 +27,10 @@ class Admin(commands.Cog):
     
     @nextcord.slash_command(name = "botsay", description = "Make the bot send a message", guild_ids=serverIdList)
     async def botsay(self, interaction: Interaction, msg:str, channel_id:str):
-        channel_str = channel
+        channel_str = channel_id
         role = get(interaction.user.roles, name=self.ROLE_FOR_ADMIN_PERMS)
         if role in interaction.user.roles:
-            channel = self.client.get_channel(int(channel))
+            channel = self.client.get_channel(int(channel_id))
             await channel.send(msg)
             await interaction.response.send_message("Message \"" + msg + "\" has been sent to channel " + channel_str + ".")
         else:
@@ -80,14 +80,13 @@ class Admin(commands.Cog):
                 print("Error: Role at message: " + str(payload.message_id) + " with emoji: " + emoji_name + " is incorrect.")
                 return
         except KeyError:
+            print("error KeyError")
             return
         
         role = guild.get_role(role_id)
 
-        try:
-            await payload.member.add_roles(role)
-        except nextcord.HTTPException:
-            pass
+
+        await payload.member.add_roles(role)
     
     @commands.Cog.listener()
     async def on_raw_reaction_remove(self, payload: nextcord.RawReactionActionEvent):
@@ -121,10 +120,7 @@ class Admin(commands.Cog):
         if member is None:
             return
 
-        try:
-            await member.remove_roles(role)
-        except nextcord.HTTPException:
-            pass
+        await member.remove_roles(role)
     
 def setup(client):
     client.add_cog(Admin(client))
