@@ -1,8 +1,8 @@
 # The Nauticock Discord Bot
 
-Updated for 2023 with new slash commands, using [nextcord](https://github.com/nextcord/nextcord) for the API.
+![The Nauticock](https://cdn.discordapp.com/attachments/798075108853809163/1068405103914135623/TheNauticock_-_Copy.png)
 
-![The Nauticock]([https://media.discordapp.net/attachments/798075108853809163/1068404889492922458/TheNauticock_-_Copy.png](https://cdn.discordapp.com/attachments/798075108853809163/1068405103914135623/TheNauticock_-_Copy.png))
+Updated for 2023 with new slash commands, using [nextcord](https://github.com/nextcord/nextcord) for the API.
 
 ## Prerequisites:
 * [Python 3.10+](https://www.python.org/)
