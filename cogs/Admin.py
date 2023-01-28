@@ -59,7 +59,6 @@ class Admin(commands.Cog):
     @commands.Cog.listener()
     async def on_raw_reaction_add(self, payload: nextcord.RawReactionActionEvent):
         if str(payload.message_id) not in self.reactionRolesJson:
-            print("not in the json")
             return
 
         guild = self.client.get_guild(payload.guild_id)
@@ -91,7 +90,6 @@ class Admin(commands.Cog):
     @commands.Cog.listener()
     async def on_raw_reaction_remove(self, payload: nextcord.RawReactionActionEvent):
         if str(payload.message_id) not in self.reactionRolesJson:
-            print("not in the json")
             return
 
         guild = self.client.get_guild(payload.guild_id)
