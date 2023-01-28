@@ -11,7 +11,6 @@ Updated for 2023 with new slash commands, using [nextcord](https://github.com/ne
 ## Initialization
 
 * You can install the required packages by running `python3 -m pip install -r requirements.txt`
-* One the urdak server, use `pip3.10 install -r requirements.txt` instead.
 * Then, create a directory named `keys`.
 * Create `discord.txt` and `serverids.txt` inside the `keys` directory.
 * Put your discord bot API key into `discord.txt`
