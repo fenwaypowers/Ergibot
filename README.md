@@ -38,8 +38,8 @@ Updated for 2023 with new slash commands, using [nextcord](https://github.com/ne
 
 ## Greetings.py
 
-* For `on_member_join()` functionality.
-* Gives the "Friends" role to new members.
+* For `on_member_update()` functionality.
+* Gives the "Friends" role to new members who pass the rules screening.
 
 ## General.py
 
