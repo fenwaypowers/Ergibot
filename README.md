@@ -1,6 +1,6 @@
 # Ergibot
 
-![Ergibot](https://github.com/fenwaypowers/Ergibot/raw/master/ergibot.png)
+![Ergibot](https://cdn.discordapp.com/attachments/798075108853809163/1070183527368368158/a4e6e1caca365dd86bcfff7417fafac1.png)
 
 Updated for 2023 with new slash commands, using [nextcord](https://github.com/nextcord/nextcord) for the API.
 
