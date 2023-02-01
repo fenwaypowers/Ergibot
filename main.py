@@ -14,7 +14,7 @@ if os.path.exists('keys/discord.txt') == False or os.path.exists('keys/serverids
         keys/serverids.txt''')
     sys.exit(1)
 else:
-    print("Running Nauticock Bot...")
+    print("Running Ergibot...")
 
 serverIdList = apikeys.serverIdList()
 BOTTOKEN = apikeys.discordApiKey()
