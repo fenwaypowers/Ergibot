@@ -16,6 +16,9 @@ if os.path.exists('keys/discord.txt') == False or os.path.exists('keys/serverids
 else:
     print("Running Ergibot...")
 
+if os.path.exists(".temp") == False:
+    os.mkdir(".temp")
+
 serverIdList = apikeys.serverIdList()
 BOTTOKEN = apikeys.discordApiKey()
 

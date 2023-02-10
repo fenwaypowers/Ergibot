@@ -3,3 +3,4 @@ test.py
 cogs/reaction_roles.json
 /.vscode
 /venv
+/db
