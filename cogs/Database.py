@@ -2,132 +2,101 @@ import nextcord
 from nextcord.ext import commands
 from nextcord import Interaction
 from nextcord.ext import application_checks
+from nextcord.utils import get
 import os, sys
-import apikeys, utils, validators, requests, urllib
-from pymediainfo import MediaInfo
-import subprocess
-
-from datetime import date
-from datetime import datetime
-from datetime import timedelta
-
-from pytz import timezone
-
-tz = timezone('EST')
+import apikeys, utils
+import aiohttp
+import datetime
+from database import *
 
 class Database(commands.Cog):
-
     serverIdList = apikeys.serverIdList()
-            
+
     def __init__(self, client):
         self.client = client
 
-        self.path_to_db = "./db/"
-        self.json_filename = "./db/db.json"
+    @nextcord.slash_command(name = "store", description = "Add an item to the database.", guild_ids=serverIdList)
+    async def store(self, interaction: Interaction, key: str, entry: str):
+        # Obtain the user information
+        username = interaction.user.name
+        userid = str(interaction.user.id)
 
-        if os.path.exists(self.path_to_db) == False:
-            os.mkdir(self.path_to_db)
+        conn = create_connection()
+        if not key_exists(conn, key):
 
-        if os.path.exists(self.json_filename) == False:
-            f = open(self.json_filename, 'a')
-            f.write("{\"entry\": {} }")
-            f.close()
-        
-        self.db = utils.load_json(self.json_filename)
-    
-    @nextcord.slash_command(name="get", description="Retrieve an entry from the database", guild_ids=serverIdList)
-    async def get(self, interaction: Interaction, key:str):
-        await interaction.response.defer()
-
-        if key in self.db["entry"]:
-            filename = self.path_to_db + key + \
-                self.db["entry"][key]["extension"]
-
-            video_type = "none"
-
-            if os.path.exists(filename):
-                media_info = MediaInfo.parse(filename)
-                for track in media_info.tracks:
-                    if track.track_type == "Video":
-                        if video_type == "none":
-                            video_type = track.format
+            # Obtain current date
+            date = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             
-            if video_type == "AV1":
+            if utils.is_url(entry):  # Add a function to check if the entry is a URL
+                # The entry is a link
+
+                # Find the file extension
+                file_extension = os.path.splitext(entry)[1]
+                file_type = file_extension.lstrip('.')
                 
-                continue_ = False
+                # Define the local path for saving the file
+                local_path = f'db/{username}/{key}{file_extension}'
 
-                embed = utils.Embedder.fromnothing()
+                # Create user's directory if not exists
+                if not os.path.exists(f'db/{username}'):
+                    os.makedirs(f'db/{username}')
+                
+                # Download the file using aiohttp
+                async with aiohttp.ClientSession() as session:
+                    async with session.get(entry) as response:
+                        if response.status == 200:
+                            with open(local_path, 'wb') as f:
+                                f.write(await response.read())
 
-                if embed.domain in self.db["entry"][key]["link"]:
-                    embed = utils.Embedder.fromlink(
-                        self.db["entry"][key]["link"])
-                    r = requests.get(embed.img)
-                    if r.status_code != 200:
-                        continue_ = True
-                else:
-                    continue_ = True
-
-                if continue_: #this will run if there is no embed link, or the 0x0 image is no longer on 0x0.
-                    subprocess.run("ffmpeg -y -i " + filename + " -vf \"select=eq(n\, 0)\" -q:v 3 ./.temp/" + key + ".jpg", shell=True)
-                    # extract first frame of the video
-
-                    subprocess.run("curl -F \"file=@./.temp/" + key + ".jpg" + "\" 0x0.st > ./.temp/" + key + ".txt", shell=True)
-                    # upload that frame to 0x0.st
-
-                    image_link = "ERROR"
-
-                    try:
-                        with open("./.temp/" + key + ".txt") as image_link_file:
-                            image_link = image_link_file.readlines()[0]
-                    except:
-                        pass
-
-                    self.db["entry"][key]["link"] = str(utils.Embedder(
-                        self.db["entry"][key]["link"], image_link)).rstrip()
-
-                    self.db = utils.save_and_load_json(self.json_filename, self.db)
-
-                    os.remove("./.temp/" + key + ".jpg")
-                    os.remove("./.temp/" + key + ".txt")
-
-            send_file = False
-            if os.path.exists(filename):
-                if os.path.getsize(filename) <= 8000000:
-                    send_file = True
-            
-            if send_file:
-                await interaction.followup.send(files=[nextcord.File(filename)])
+                # Store the entry to the database
+                conn = create_connection()
+                store_entry(conn, (username, userid, date, entry, key, file_extension, file_type, local_path, "link"))
+                select_all_links(conn)
+                close_connection(conn)
             else:
-                link = self.db["entry"][key]["link"]
-                request = requests.get(link)
+                # The entry is a text
 
-                if request.status_code == 200:
-                    await interaction.followup.send(link)
-                else:
-                    await interaction.followup.send("That link has died \:(\nError code: " + str(request.status_code))
+                # Store the text entry to the database
+                conn = create_connection()
+                store_entry(conn, (username, userid, date, entry, key, None, None, None, "text"))
+                select_all_links(conn)
+                close_connection(conn)
+
+            await interaction.response.send_message(f'Successfully stored {key}!')
         else:
-            await interaction.followup.send("No such entry found for key: `" + key + "`")
+            await interaction.response.send_message(f"Key: `{key}` already exists. Try a different key.")
 
-    @nextcord.slash_command(name="put", description="Enter data into the database", guild_ids=serverIdList)
-    async def put(self, interaction: Interaction, key: str, link: str):
-        await interaction.response.defer()
-        user = interaction.user
-        date = datetime.now(tz)
-        
-        if key in self.db["entry"]:
-            await interaction.followup.send("The key: `" + key + "` is already in the database.")
+    @nextcord.slash_command(name = "retrieve", description = "Retrieve an item from the database.", guild_ids=serverIdList)
+    async def retrieve(self, interaction: Interaction, key: str):
+        conn = create_connection()
+        rows = retrieve_link(conn, key)
+        row_dict = get_row_index()
+
+        if rows:
+            for row in rows:
+                entry_type = row[row_dict["type"]]
+                entry = row[row_dict["entry"]]
+                
+                if entry_type == "link":
+                    local_path = row[row_dict["local_path"]]
+                    
+                    # Check if link is valid
+                    async with aiohttp.ClientSession() as session:
+                        async with session.get(entry) as response:
+                            if response.status == 200:
+                                await interaction.response.send_message(entry)
+                            else:
+                                await interaction.response.send_message("The original link is broken, but here is the archived file:")
+                                await interaction.channel.send(file=nextcord.File(local_path))
+
+                elif entry_type == "text":
+                    # For text entries, simply send the stored text
+                    await interaction.response.send_message(entry)
         else:
-            r = requests.get(link)
-            if r.status_code != 200:
-                await interaction.followup.send("Not a valid link.")
-            else:
-                self.db["entry"][key] = {"user": str(user), "userid": str(user.id), "date": str(date), "link": link, "extension": "." + link.split(".")[-1]}
-                self.db = utils.save_and_load_json(self.json_filename, self.db)
-                await interaction.followup.send("Key: `" + key + "` successfully saved to the database.")
-
+            await interaction.response.send_message("No entries found for the provided key.")
         
-
-
+        select_all_links(conn)
+        close_connection(conn)
 
 def setup(client):
     client.add_cog(Database(client))

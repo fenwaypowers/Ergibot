@@ -1,4 +1,13 @@
 import json, os
+from urllib.parse import urlparse
+
+def is_url(string):
+    try:
+        result = urlparse(string)
+        return all([result.scheme, result.netloc])
+    except ValueError:
+        return False
+
 def save_json(file: str, data: dict):
     "removes old file and then replaces it with fresh data @tpowell11"
     os.remove(file)  # delete outdated data
