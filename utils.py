@@ -51,3 +51,4 @@ class Embedder():
 
     def __str__(self):
         return self.link
+    

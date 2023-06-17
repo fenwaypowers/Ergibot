@@ -1,5 +1,6 @@
 import sqlite3, os
 from sqlite3 import Error
+from database import *
 
 def create_coin_connection():
     conn = None
@@ -11,23 +12,6 @@ def create_coin_connection():
     
     if conn:
         return conn
-
-def close_coin_connection(conn):
-    conn.commit()
-    conn.close()
-    print("connection closed")
-
-def create_money_table(conn):
-    try:
-        sql_create_table = """CREATE TABLE IF NOT EXISTS money (
-                                            id integer PRIMARY KEY AUTOINCREMENT,
-                                            username text NOT NULL,
-                                            userid text NOT NULL,
-                                            coins int NOT NULL DEFAULT 1000
-                                        );"""
-        conn.execute(sql_create_table)
-    except Error as e:
-        print(e)
 
 def initialize_user_money(conn, username, userid):
     if not user_exists_in_money_table(conn, userid):
@@ -99,7 +83,3 @@ def modify_wallet(conn, username, userid, amount):
     update_user_money(conn, userid, user_money + amount)
     
     return True
-
-conn = create_coin_connection()
-create_money_table(conn)
-close_coin_connection(conn)

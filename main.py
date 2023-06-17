@@ -4,8 +4,19 @@ from nextcord import Interaction
 from nextcord.ext import application_checks
 import os, sys
 import apikeys
+from database import *
 
-if os.path.exists('keys/discord.txt') == False or os.path.exists('keys/serverids.txt') == False:
+conn = create_connection()
+create_tables(conn)
+close_connection(conn)
+
+if not os.path.exists('db'):
+    os.mkdir('db')
+
+if not os.path.exists('keys'):
+    os.mkdir('keys')    
+
+if not os.path.exists('keys/discord.txt') or not os.path.exists('keys/serverids.txt'):
     print('''Please initialize the keys/ directory with discord.txt and serverids.txt.
     Put your Discord API key into discord.txt.
     Put the ID of the servers you want to allow the bot to message in.

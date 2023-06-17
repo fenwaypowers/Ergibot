@@ -75,3 +75,4 @@ class Rps():
             self.win_state = 2 # Player won
         else:
             self.win_state = 3 # Player loses
+            

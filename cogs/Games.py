@@ -54,7 +54,7 @@ class Games(commands.Cog):
 
         close_connection(conn)
 
-    @nextcord.slash_command(name = "wallet", description = "Show how much money user has in wallet.", guild_ids=serverIdList)
+    @nextcord.slash_command(name = "wallet", description = "Show how much ergicoins user has in wallet.", guild_ids=serverIdList)
     async def wallet(self, interaction: Interaction, member: nextcord.Member=None):
         if member is None:
             userid = str(interaction.user.id)
@@ -66,11 +66,11 @@ class Games(commands.Cog):
         conn = create_coin_connection()
         
         coins = get_user_money(conn, userid, username)
-        close_coin_connection(conn)
+        close_connection(conn)
         
-        await interaction.response.send_message(f"{member.name if member else interaction.user.name} has {coins} coins.")
+        await interaction.response.send_message(f"{member.name if member else interaction.user.name} has {coins} ergicoins.")
     
-    @nextcord.slash_command(name = "transfer", description = "Transfer ergicoin to another user.", guild_ids=serverIdList)
+    @nextcord.slash_command(name = "transfer", description = "Transfer ergicoins to another user.", guild_ids=serverIdList)
     async def transfer(self, interaction: Interaction, member: nextcord.Member, amount: int):
         conn = create_coin_connection()
 
@@ -79,7 +79,7 @@ class Games(commands.Cog):
         
         transfer_coins(conn, interaction.user.id, member.id, amount)
         await interaction.response.send_message(f"{interaction.user.name}, you have successfully sent {amount} ergicoins to {member.name}.")
-        close_coin_connection(conn)
+        close_connection(conn)
 
 def setup(client):
     client.add_cog(Games(client))

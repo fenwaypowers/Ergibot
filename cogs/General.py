@@ -21,3 +21,4 @@ The bot was originally written in 2020, but as of 2023 has been completely re-wr
 
 def setup(client):
     client.add_cog(General(client))
+    
