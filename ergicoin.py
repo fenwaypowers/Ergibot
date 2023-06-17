@@ -2,17 +2,6 @@ import sqlite3, os
 from sqlite3 import Error
 from database import *
 
-def create_coin_connection():
-    conn = None
-    try:
-        conn = sqlite3.connect(os.path.join('db','ergicoin.sqlite'))
-        print(f'successful connection with sqlite version {sqlite3.version}')
-    except Error as e:
-        print(e)
-    
-    if conn:
-        return conn
-
 def initialize_user_money(conn, username, userid):
     if not user_exists_in_money_table(conn, userid):
         sql = ''' INSERT INTO money(username, userid, coins)
@@ -24,6 +13,8 @@ def initialize_user_money(conn, username, userid):
     return None
 
 def update_user_money(conn, userid, new_money):
+    if new_money == 0:
+        new_money = 1000
     sql = ''' UPDATE money
               SET coins = ?
               WHERE userid = ?'''
@@ -49,7 +40,10 @@ def get_user_money(conn, userid, username=None):
     cur.execute(sql, (userid,))
     money = cur.fetchone()
 
-    if money is not None:
+    if money[0] == 0:
+        update_user_money(conn, userid, 0)
+        return 1000
+    elif money is not None:
         return money[0]
     else:
         return None

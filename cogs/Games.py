@@ -17,7 +17,7 @@ class Games(commands.Cog):
 
     @nextcord.slash_command(name = "rps", description = "Play Rock Paper Scissors with the bot!", guild_ids=serverIdList)
     async def rps(self, interaction: Interaction, bet: int = 0):
-        conn = create_coin_connection()
+        conn = create_connection()
 
         # Check if the user is in the money table
         userid = str(interaction.user.id)
@@ -63,7 +63,7 @@ class Games(commands.Cog):
             userid = str(member.id)
             username = str(member.name)
 
-        conn = create_coin_connection()
+        conn = create_connection()
         
         coins = get_user_money(conn, userid, username)
         close_connection(conn)
@@ -72,7 +72,7 @@ class Games(commands.Cog):
     
     @nextcord.slash_command(name = "transfer", description = "Transfer ergicoins to another user.", guild_ids=serverIdList)
     async def transfer(self, interaction: Interaction, member: nextcord.Member, amount: int):
-        conn = create_coin_connection()
+        conn = create_connection()
 
         initialize_user_money(conn, member.name, member.id)
         initialize_user_money(conn, interaction.user.name, interaction.user.id)

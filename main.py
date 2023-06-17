@@ -7,7 +7,6 @@ import apikeys
 from database import *
 
 conn = create_connection()
-create_tables(conn)
 close_connection(conn)
 
 if not os.path.exists('db'):

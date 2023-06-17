@@ -4,16 +4,6 @@ from sqlite3 import Error
 import shutil
 import datetime
 
-def create_tables(conn):
-    try:
-        sql_create_table = """CREATE TABLE IF NOT EXISTS backups (
-                                            id integer PRIMARY KEY AUTOINCREMENT,
-                                            date text NOT NULL
-                                        );"""
-        conn.execute(sql_create_table)
-    except Error as e:
-        print(e)
-
 def store_backup_date(conn):
     date = datetime.datetime.now().isoformat()
     sql = ''' INSERT INTO backups(date) VALUES(?) '''
@@ -57,6 +47,7 @@ def create_connection():
         print(e)
     
     if conn:
+        create_tables(conn)
         return conn
 
 def close_connection(conn):
@@ -79,7 +70,7 @@ def get_row_index():
         "type" : 9
     }
 
-def create_entries_table(conn):
+def create_tables(conn):
     try:
         sql_create_table = """CREATE TABLE IF NOT EXISTS entries (
                                             id integer PRIMARY KEY AUTOINCREMENT,
@@ -103,6 +94,15 @@ def create_entries_table(conn):
                                             username text NOT NULL,
                                             userid text NOT NULL,
                                             coins int NOT NULL DEFAULT 1000
+                                        );"""
+        conn.execute(sql_create_table)
+    except Error as e:
+        print(e)
+
+    try:
+        sql_create_table = """CREATE TABLE IF NOT EXISTS backups (
+                                            id integer PRIMARY KEY AUTOINCREMENT,
+                                            date text NOT NULL
                                         );"""
         conn.execute(sql_create_table)
     except Error as e:
