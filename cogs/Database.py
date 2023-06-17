@@ -15,8 +15,8 @@ class Database(commands.Cog):
     def __init__(self, client):
         self.client = client
 
-    @nextcord.slash_command(name = "store", description = "Add an item to the database.", guild_ids=serverIdList)
-    async def store(self, interaction: Interaction, key: str, entry: str):
+    @nextcord.slash_command(name = "put", description = "Add an item to the database.", guild_ids=serverIdList)
+    async def put(self, interaction: Interaction, key: str, entry: str):
         # Obtain the user information
         username = interaction.user.name
         userid = str(interaction.user.id)
@@ -66,8 +66,8 @@ class Database(commands.Cog):
         else:
             await interaction.response.send_message(f"Key: `{key}` already exists. Try a different key.")
 
-    @nextcord.slash_command(name = "retrieve", description = "Retrieve an item from the database.", guild_ids=serverIdList)
-    async def retrieve(self, interaction: Interaction, key: str):
+    @nextcord.slash_command(name = "get", description = "Retrieve an item from the database.", guild_ids=serverIdList)
+    async def get(self, interaction: Interaction, key: str):
         conn = create_connection()
         rows = retrieve_link(conn, key)
         row_dict = get_row_index()
@@ -93,7 +93,7 @@ class Database(commands.Cog):
                     # For text entries, simply send the stored text
                     await interaction.response.send_message(entry)
         else:
-            await interaction.response.send_message("No entries found for the provided key.")
+            await interaction.response.send_message(f"No entries found for the provided key: `{key}`.")
         
         select_all_links(conn)
         close_connection(conn)

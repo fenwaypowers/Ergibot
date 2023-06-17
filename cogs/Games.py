@@ -7,16 +7,52 @@ import os, sys
 import apikeys, utils
 from database import *
 from ergicoin import *
+from games import *
 
 class Games(commands.Cog):
     serverIdList = apikeys.serverIdList()
 
     def __init__(self, client):
         self.client = client
-    
+
     @nextcord.slash_command(name = "rps", description = "Play Rock Paper Scissors with the bot!", guild_ids=serverIdList)
-    async def help(self, interaction: Interaction, bet=0):
-        await interaction.response.send_message(f"Not implemented yet.")
+    async def rps(self, interaction: Interaction, bet: int = 0):
+        conn = create_coin_connection()
+
+        # Check if the user is in the money table
+        userid = str(interaction.user.id)
+        username = interaction.user.name
+
+        # Check if the user has enough money to bet
+        user_money = get_user_money(conn, userid, username)
+        if user_money < bet:
+            await interaction.response.send_message("You don't have enough coins to make that bet.")
+            close_connection(conn)
+            return
+
+        view = RpsInteractions(interaction.user)
+
+        await interaction.response.send_message("Choose Rock, Paper, or Scissors:", view=view)
+        await view.wait()
+
+        if view.value is None:
+            await interaction.channel.send("Nothing chosen.")
+            return
+        elif view.value:
+
+            # Start a game of RPS
+            game = Rps(view.value)
+            result = game.rps(bet)
+
+            # Handle the bet
+            if game.win_state == 2:  # Player won
+                update_user_money(conn, userid, user_money + bet)
+            elif game.win_state == 3:  # Player lost
+                update_user_money(conn, userid, user_money - bet)
+            
+            await interaction.channel.send(result)
+
+        close_connection(conn)
 
     @nextcord.slash_command(name = "wallet", description = "Show how much money user has in wallet.", guild_ids=serverIdList)
     async def wallet(self, interaction: Interaction, member: nextcord.Member=None):
