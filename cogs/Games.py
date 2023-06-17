@@ -27,12 +27,7 @@ class Games(commands.Cog):
             userid = str(member.id)
             username = str(member.name)
 
-        print(username)
-
         conn = create_coin_connection()
-        
-        if not user_exists_in_money_table(conn, userid):
-            initialize_user_money(conn, member.name if member else interaction.user.name, userid)
         
         coins = get_user_money(conn, userid, username)
         close_coin_connection(conn)
@@ -42,6 +37,10 @@ class Games(commands.Cog):
     @nextcord.slash_command(name = "transfer", description = "Transfer ergicoin to another user.", guild_ids=serverIdList)
     async def transfer(self, interaction: Interaction, member: nextcord.Member, amount: int):
         conn = create_coin_connection()
+
+        initialize_user_money(conn, member.name, member.id)
+        initialize_user_money(conn, interaction.user.name, interaction.user.id)
+        
         transfer_coins(conn, interaction.user.id, member.id, amount)
         await interaction.response.send_message(f"{interaction.user.name}, you have successfully sent {amount} ergicoins to {member.name}.")
         close_coin_connection(conn)
