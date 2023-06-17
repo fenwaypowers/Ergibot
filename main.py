@@ -13,11 +13,8 @@ if os.path.exists('keys/discord.txt') == False or os.path.exists('keys/serverids
         keys/discord.txt
         keys/serverids.txt''')
     sys.exit(1)
-else:
-    print("Running Ergibot...")
 
-if os.path.exists(".temp") == False:
-    os.mkdir(".temp")
+print("Running Ergibot...")
 
 serverIdList = apikeys.serverIdList()
 BOTTOKEN = apikeys.discordApiKey()
