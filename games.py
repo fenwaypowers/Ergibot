@@ -75,4 +75,126 @@ class Rps():
             self.win_state = 2 # Player won
         else:
             self.win_state = 3 # Player loses
-            
+
+class BjInteractions(nextcord.ui.View):
+    def __init__(self, user):
+        super().__init__()
+        self.value = None
+        self.user = user
+    
+    @nextcord.ui.button(style=nextcord.ButtonStyle.secondary, label="Stand")
+    async def rock(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
+        if interaction.user.id == self.user.id:
+            self.value = "stand"
+            self.stop()
+    
+    @nextcord.ui.button(style=nextcord.ButtonStyle.secondary, label="Hit")
+    async def paper(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
+        if interaction.user.id == self.user.id:
+            self.value = "hit"
+            self.stop()
+
+class Blackjack():
+    deckcards = ['A'] * 4 + ['K'] * 4  + ['Q'] * 4 + ['J'] * 4 + ['2'] * 4 + ['3'] * 4 + ['4'] * 4 + ['5'] * 4 + ['6'] * 4 + ['7'] * 4 + ['8'] * 4 + ['9'] * 4 + ['10'] * 4
+    cardvalues = {
+    'K':10,
+    'Q':10,
+    'A':11,
+    'J':10,
+    '2':2,
+    '3':3,
+    '4':4,
+    '5':5,
+    '6':6,
+    '7':7,
+    '8':8,
+    '9':9,
+    '10':10
+    }
+
+    def __init__(self, user, bet):
+        self.user = user
+        self.bet = bet
+        self.deck = self.deckcards
+        random.shuffle(self.deck)
+        self.playerhand = []
+        self.dealerhand = []
+        self.playerscore = 0
+        self.dealerscore = 0
+        self.winner = None
+        self.game_over = False
+        self.startGame()
+
+    def pickCard(self):
+        return self.deck.pop()      
+
+    def playerPick(self):
+        self.playerhand.append(self.pickCard())
+
+    def dealerPick(self):
+        self.dealerhand.append(self.pickCard())
+
+    def startGame(self):
+        for i in range(0, 2):
+            self.playerPick()
+        
+        for i in range(0, 2):
+            self.dealerPick()
+
+        self.checkForWinner()
+
+    def calcScore(self, hand):
+        score = sum(self.cardvalues[card] for card in hand)
+        if 'A' in hand:
+            if score > 21:
+                score -= 10 * hand.count('A')
+        return score
+
+    def checkForWinner(self):
+        self.playerscore = self.calcScore(self.playerhand)
+        self.dealerscore = self.calcScore(self.dealerhand)
+
+        if self.playerscore == 21:
+            self.winner = self.user
+            self.game_over = True
+        elif self.dealerscore == 21:
+            self.winner = 'Dealer'
+            self.game_over = True
+        elif self.playerscore > 21:
+            self.winner = 'Dealer'
+            self.game_over = True
+        elif self.dealerscore > 21:
+            self.winner = self.user
+            self.game_over = True
+        elif self.game_over:  # When player chooses to 'stand'
+            if self.playerscore > self.dealerscore:
+                self.winner = self.user
+            elif self.playerscore < self.dealerscore:
+                self.winner = 'Dealer'
+            else:
+                self.winner = 'Push'
+
+    def stringHands(self):
+        strng = ""
+        if not self.game_over:
+            concealedhand = [self.dealerhand[0], "?"]
+            strng += f"Dealer's hand: {concealedhand}"  # Concealment is done here
+        else:
+            strng += f"Dealer's hand: {self.dealerhand}"
+
+        strng += f"\n{self.user.name}'s hand: {self.playerhand}"
+
+        return strng
+
+    def hit(self):
+        self.playerPick()
+        self.checkForWinner()
+
+    def stand(self):
+        self.game_over = True
+        self.dealerPlays()
+
+    def dealerPlays(self):
+        while self.calcScore(self.dealerhand) < 17:
+            self.dealerPick()
+        self.checkForWinner()

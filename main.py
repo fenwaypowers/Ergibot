@@ -6,8 +6,6 @@ import os, sys
 import apikeys
 from database import *
 
-
-
 if not os.path.exists('db'):
     os.mkdir('db')
 
