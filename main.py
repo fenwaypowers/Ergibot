@@ -6,8 +6,7 @@ import os, sys
 import apikeys
 from database import *
 
-conn = create_connection()
-close_connection(conn)
+
 
 if not os.path.exists('db'):
     os.mkdir('db')
@@ -25,6 +24,9 @@ if not os.path.exists('keys/discord.txt') or not os.path.exists('keys/serverids.
     sys.exit(1)
 
 print("Running Ergibot...")
+
+conn = create_connection()
+close_connection(conn)
 
 serverIdList = apikeys.serverIdList()
 BOTTOKEN = apikeys.discordApiKey()
