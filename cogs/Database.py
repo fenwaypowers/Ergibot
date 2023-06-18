@@ -17,7 +17,7 @@ class Database(commands.Cog):
         self.client = client
 
     @nextcord.slash_command(name = "put", description = "Add an item to the database.", guild_ids=serverIdList)
-    async def put(self, interaction: Interaction, key: str, entry: Optional[str], att: Optional[nextcord.Attachment], override: bool = False):
+    async def put(self, interaction: Interaction, key: str, entry: Optional[str], attachment: Optional[nextcord.Attachment], override: bool = False):
         # Obtain the user information
         username = interaction.user.name
         userid = str(interaction.user.id)
@@ -42,18 +42,18 @@ class Database(commands.Cog):
             # Obtain current date
             date = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-            if att:
+            if attachment:
                 # User sent a file, save it to the filesystem
-                local_path = f'db/{username}/{att.filename}'
-                await att.save(local_path)
+                local_path = f'db/{username}/{attachment.filename}'
+                await attachment.save(local_path)
 
                 # Define the file extension
-                file_extension = os.path.splitext(att.filename)[1]
+                file_extension = os.path.splitext(attachment.filename)[1]
                 file_type = file_extension.lstrip('.')
 
                 # Store the entry to the database
                 conn = create_connection()
-                store_entry(conn, (username, userid, date, att.url, key, file_extension, file_type, local_path, "file"))
+                store_entry(conn, (username, userid, date, attachment.url, key, file_extension, file_type, local_path, "file"))
                 select_all_links(conn)
 
                 await interaction.response.send_message(f'Successfully stored `{key}`!')
