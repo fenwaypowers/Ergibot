@@ -137,3 +137,10 @@ def key_exists(conn, key):
     rows = cur.fetchall()
 
     return len(rows) > 0
+
+def delete_entry(conn, key):
+    sql = ''' DELETE FROM entries WHERE key=? '''
+    cur = conn.cursor()
+    cur.execute(sql, (key,))
+    conn.commit()
+    cur.close()

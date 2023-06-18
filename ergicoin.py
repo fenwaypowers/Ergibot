@@ -47,11 +47,6 @@ def get_user_money(conn, userid, username=None):
         return money[0]
     else:
         return None
-    
-def print_all_tables(conn):
-    cur = conn.cursor()
-    cur.execute("SELECT name FROM sqlite_master WHERE type='table';")
-    print(cur.fetchall())
 
 def transfer_coins(conn, from_userid, to_userid, amount):
     from_user_money = get_user_money(conn, from_userid)
