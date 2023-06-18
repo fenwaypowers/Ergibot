@@ -19,6 +19,10 @@ The bot was originally written in 2020, but as of 2023 has been completely re-wr
 '''
         await interaction.response.send_message(help_message)
 
+    @nextcord.slash_command(name = "kevin", description = "Displays a random image of Kevin. Try to get the ultra-rare Kevin!", guild_ids=serverIdList)
+    async def kevin(self, interaction: Interaction):
+        await interaction.response.send_message("Not yet implemented.")
+
 def setup(client):
     client.add_cog(General(client))
     
