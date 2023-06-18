@@ -57,6 +57,9 @@ def transfer_coins(conn, from_userid, to_userid, amount):
 
     if from_user_money < amount:
         return False  # Not enough coins
+    
+    if from_user_money - amount < 1000:
+        return False # Ensures user will have at least 1000 coins after transfer.
 
     update_user_money(conn, from_userid, from_user_money - amount)
     update_user_money(conn, to_userid, to_user_money + amount)
@@ -72,3 +75,6 @@ def modify_wallet(conn, username, userid, amount):
     update_user_money(conn, userid, user_money + amount)
     
     return True
+
+def validate_bet(user_money, bet):
+    return user_money < bet or bet < 0

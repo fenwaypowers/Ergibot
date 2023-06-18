@@ -56,7 +56,7 @@ class Database(commands.Cog):
                 store_entry(conn, (username, userid, date, att.url, key, file_extension, file_type, local_path, "file"))
                 select_all_links(conn)
 
-                await interaction.response.send_message(f'Successfully stored {key}!')
+                await interaction.response.send_message(f'Successfully stored `{key}`!')
             elif entry:
                 if utils.is_url(entry):  # Add a function to check if the entry is a URL
                     # The entry is a link
@@ -91,7 +91,7 @@ class Database(commands.Cog):
                     store_entry(conn, (username, userid, date, entry, key, None, None, None, "text"))
                     select_all_links(conn)
 
-                await interaction.response.send_message(f'Successfully stored {key}!')
+                await interaction.response.send_message(f'Successfully stored `{key}`!')
             else:
                 await interaction.response.send_message(f"No entry or file provided. Try again.")
         else:

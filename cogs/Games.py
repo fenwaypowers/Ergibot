@@ -25,8 +25,8 @@ class Games(commands.Cog):
 
         # Check if the user has enough money to bet
         user_money = get_user_money(conn, userid, username)
-        if user_money < bet:
-            await interaction.response.send_message("You don't have enough coins to make that bet.")
+        if validate_bet(user_money, bet):
+            await interaction.response.send_message("You don't have enough coins to make that bet, or you used a negative value.")
             close_connection(conn)
             return
 
@@ -77,8 +77,10 @@ class Games(commands.Cog):
         initialize_user_money(conn, member.name, member.id)
         initialize_user_money(conn, interaction.user.name, interaction.user.id)
         
-        transfer_coins(conn, interaction.user.id, member.id, amount)
-        await interaction.response.send_message(f"{interaction.user.name}, you have successfully sent {amount} ergicoins to {member.name}.")
+        if transfer_coins(conn, interaction.user.id, member.id, amount):
+            await interaction.response.send_message(f"{interaction.user.name}, you have successfully sent {amount} ergicoins to {member.name}.")
+        else:
+            await interaction.response.send_message(f"Error occured during transfer. Please make sure that after the transfer you will have a minimum of 1000 ergicoins.")
         close_connection(conn)
 
 def setup(client):

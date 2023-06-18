@@ -18,7 +18,7 @@ if not os.path.exists('keys'):
 if not os.path.exists('keys/discord.txt') or not os.path.exists('keys/serverids.txt'):
     print('''Please initialize the keys/ directory with discord.txt and serverids.txt.
     Put your Discord API key into discord.txt.
-    Put the ID of the servers you want to allow the bot to message in.
+    Put the ID of the servers you want to allow the bot to message in serverids.txt.
     Therefore, you should have these files:
         keys/discord.txt
         keys/serverids.txt''')
