@@ -17,7 +17,7 @@ class Database(commands.Cog):
         self.client = client
 
     @nextcord.slash_command(name = "put", description = "Add an item to the database.", guild_ids=serverIdList)
-    async def put(self, interaction: Interaction, key: str, entry: Optional[str], attachment: Optional[nextcord.Attachment], override: bool = False):
+    async def put(self, interaction: Interaction, key: str, entry: Optional[str], attachment: Optional[nextcord.Attachment], language: Optional[str], override: bool = False):
         # Obtain the user information
         username = interaction.user.name
         userid = str(interaction.user.id)
@@ -53,14 +53,15 @@ class Database(commands.Cog):
 
                 # Store the entry to the database
                 conn = create_connection()
-                store_entry(conn, (username, userid, date, attachment.url, key, file_extension, file_type, local_path, "file"))
+                store_entry(conn, (username, userid, date, attachment.url, key, file_extension, file_type, local_path, "file", None))
                 select_all_links(conn)
 
                 await interaction.response.send_message(f'Successfully stored `{key}`!')
+
             elif entry:
                 if utils.is_url(entry):
                     # The entry is a link
-                    
+
                     # Define the file extension
                     file_extension = os.path.splitext(entry)[1]
                     file_type = file_extension.lstrip('.')
@@ -71,7 +72,7 @@ class Database(commands.Cog):
                     # Create user's directory if not exists
                     if not os.path.exists(f'db/{username}'):
                         os.makedirs(f'db/{username}')
-                    
+
                     # Download the file using aiohttp
                     async with aiohttp.ClientSession() as session:
                         async with session.get(entry) as response:
@@ -81,14 +82,23 @@ class Database(commands.Cog):
 
                     # Store the entry to the database
                     conn = create_connection()
-                    store_entry(conn, (username, userid, date, entry, key, file_extension, file_type, local_path, "link"))
+                    store_entry(conn, (username, userid, date, entry, key, file_extension, file_type, local_path, "link", None))
                     select_all_links(conn)
+
+                elif language:
+                    # The entry is a code snippet
+
+                    # Store the entry to the database
+                    conn = create_connection()
+                    store_entry(conn, (username, userid, date, entry, key, None, None, None, "code", language))
+                    select_all_links(conn)
+
                 else:
                     # The entry is text
 
                     # Store the text entry to the database
                     conn = create_connection()
-                    store_entry(conn, (username, userid, date, entry, key, None, None, None, "text"))
+                    store_entry(conn, (username, userid, date, entry, key, None, None, None, "text", None))
                     select_all_links(conn)
 
                 await interaction.response.send_message(f'Successfully stored `{key}`!')
@@ -96,7 +106,7 @@ class Database(commands.Cog):
                 await interaction.response.send_message(f"No entry or file provided. Try again.")
         else:
             await interaction.response.send_message(f"Key: `{key}` already exists. Try a different key or use the override option.")
-        
+
         close_connection(conn)
 
     @nextcord.slash_command(name = "get", description = "Retrieve an item from the database.", guild_ids=serverIdList)
@@ -109,32 +119,40 @@ class Database(commands.Cog):
             for row in rows:
                 entry_type = row[row_dict["type"]]
                 entry = row[row_dict["entry"]]
-                
+
                 if entry_type == "link" or entry_type == "file":
                     local_path = row[row_dict["local_path"]]
-                    
+
                     # Check if link is valid
                     async with aiohttp.ClientSession() as session:
                         async with session.get(entry) as response:
                             if response.status == 200:
+                                await interaction.response.send_message(entry)
                                 if show_key:
                                     await interaction.channel.send(f"Key: `{key}`\n")
-                                await interaction.response.send_message(entry)
+
                             else:
                                 await interaction.response.send_message("The original link is broken, but here is the archived file:")
                                 await interaction.channel.send(file=nextcord.File(local_path))
 
-                elif entry_type == "text":
-                    # For text entries, simply send the stored text
+                elif entry_type == "code":
+                    # For text entries, simply send the stored text inside a markdown code block with the language identifier
+                    lang = row[row_dict["language"]]
+
+                    await interaction.response.send_message(f"```{lang}\n{entry}\n```")
                     if show_key:
                         await interaction.channel.send(f"Key: `{key}`\n")
+
+                elif entry_type == "text":
+                    # For text entries, simply send the stored text
                     await interaction.response.send_message(entry)
+                    if show_key:
+                        await interaction.channel.send(f"Key: `{key}`\n")
         else:
             await interaction.response.send_message(f"No entries found for the provided key: `{key}`.")
-        
+
         select_all_links(conn)
         close_connection(conn)
 
 def setup(client):
     client.add_cog(Database(client))
-    
