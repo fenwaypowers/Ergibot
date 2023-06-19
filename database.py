@@ -26,7 +26,7 @@ def retrieve_latest_backup_date(conn):
 def backup_database():
     backup_dir = os.path.join('db', 'backups')
     os.makedirs(backup_dir, exist_ok=True)
-    backup_file = os.path.join(backup_dir, f'ergibot_db_backup_{datetime.datetime.now().isoformat()}.sqlite')
+    backup_file = os.path.join(backup_dir, f'ergibot_db_backup_{datetime.datetime.now().isoformat().replace(":", "-")}.sqlite')
     shutil.copy2(os.path.join('db', f'ergibot_db.sqlite'), backup_file)
 
 def check_and_perform_backup(conn):
@@ -45,7 +45,7 @@ def create_connection():
         print(f'successful connection with sqlite version {sqlite3.version}')
     except Error as e:
         print(e)
-    
+
     if conn:
         create_tables(conn)
         return conn
@@ -58,16 +58,17 @@ def close_connection(conn):
 
 def get_row_index():
     return {
-        "id" : 0,
-        "username": 1,
-        "userid" : 2,
-        "date" : 3,
-        "entry" : 4,
-        "key" : 5,
+        "id"             : 0,
+        "username"       : 1,
+        "userid"         : 2,
+        "date"           : 3,
+        "entry"          : 4,
+        "key"            : 5,
         "file_extension" : 6,
-        "file_type" : 7,
-        "local_path" : 8,
-        "type" : 9
+        "file_type"      : 7,
+        "local_path"     : 8,
+        "type"           : 9,
+        "language"       : 10
     }
 
 def create_tables(conn):
@@ -82,7 +83,8 @@ def create_tables(conn):
                                             file_extension text,
                                             file_type text,
                                             local_path text,
-                                            type text NOT NULL
+                                            type text NOT NULL,
+                                            language text
                                         );"""
         conn.execute(sql_create_table)
     except Error as e:
@@ -109,8 +111,8 @@ def create_tables(conn):
         print(e)
 
 def store_entry(conn, entry):
-    sql = ''' INSERT INTO entries(username,userid,date,entry,key,file_extension,file_type,local_path,type)
-              VALUES(?,?,?,?,?,?,?,?,?) '''
+    sql = ''' INSERT INTO entries(username,userid,date,entry,key,file_extension,file_type,local_path,type,language)
+              VALUES(?,?,?,?,?,?,?,?,?,?) '''
     cur = conn.cursor()
     cur.execute(sql, entry)
     conn.commit()
@@ -129,7 +131,7 @@ def select_all_links(conn):
     rows = cur.fetchall()
     for row in rows:
         print(row)
-        
+
 def key_exists(conn, key):
     sql = ''' SELECT * FROM entries WHERE key=? '''
     cur = conn.cursor()
