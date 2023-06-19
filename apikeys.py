@@ -5,8 +5,12 @@ def serverIdList():
         
     # converts all the strings to ints
     for i in range(0, len(serverIdList)):
+        serverIdList[i] = serverIdList[i].rstrip()
         if serverIdList[i].isdigit():
             serverIdList[i] = int(serverIdList[i])
+
+    
+    print(serverIdList)
     
     return serverIdList
 

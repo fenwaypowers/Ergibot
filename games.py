@@ -96,6 +96,7 @@ class BjInteractions(nextcord.ui.View):
 
 class Blackjack():
     deckcards = ['A'] * 4 + ['K'] * 4  + ['Q'] * 4 + ['J'] * 4 + ['2'] * 4 + ['3'] * 4 + ['4'] * 4 + ['5'] * 4 + ['6'] * 4 + ['7'] * 4 + ['8'] * 4 + ['9'] * 4 + ['10'] * 4
+    
     cardvalues = {
     'K':10,
     'Q':10,
@@ -112,10 +113,26 @@ class Blackjack():
     '10':10
     }
 
-    def __init__(self, user, bet):
+    cardemojis = {
+        'K': '<:k_:1120154858499084358>',
+        'Q': '<:q_:1120154861783236640>',
+        'A': '<:a_:1120154855634378826>',
+        'J': '<:j_:1120154857521819738>',
+        '2': '<:2_:1120154971850162226>',
+        '3': '<:3_:1120155035041538108>',
+        '4': '<:4_:1120155021057720361>',
+        '5': '<:5_:1120154860617220126>',
+        '6': '<:6_:1120154915940089947>',
+        '7': '<:7_:1120154863989436506>',
+        '8': '<:8_:1120154862894727219>',
+        '9': '<:9_:1120154859296006280>',
+        '10': '<:10:1120154868041134080>',
+        '?': ':question:'
+    }
+
+    def __init__(self, user):
         self.user = user
-        self.bet = bet
-        self.deck = self.deckcards
+        self.deck = self.deckcards.copy()
         random.shuffle(self.deck)
         self.playerhand = []
         self.dealerhand = []
@@ -126,7 +143,7 @@ class Blackjack():
         self.startGame()
 
     def pickCard(self):
-        return self.deck.pop()      
+        return self.deck.pop()  
 
     def playerPick(self):
         self.playerhand.append(self.pickCard())
@@ -177,14 +194,21 @@ class Blackjack():
     def stringHands(self):
         strng = ""
         if not self.game_over:
-            concealedhand = [self.dealerhand[0], "?"]
+            concealedhand = f"{self.cardemojis[self.dealerhand[0]]} {self.cardemojis['?']}"
             strng += f"Dealer's hand: {concealedhand}"  # Concealment is done here
         else:
-            strng += f"Dealer's hand: {self.dealerhand}"
+            strng += f"Dealer's hand: {self.prettyPrintHand(self.dealerhand)}"
 
-        strng += f"\n{self.user.name}'s hand: {self.playerhand}"
+        strng += f"\n{self.user.name}'s hand: {self.prettyPrintHand(self.playerhand)}"
 
         return strng
+
+    def prettyPrintHand(self, hand):
+        new = ""
+        for card in hand:
+            new += f"{self.cardemojis[card]} "
+
+        return new
 
     def hit(self):
         self.playerPick()
@@ -193,6 +217,7 @@ class Blackjack():
     def stand(self):
         self.game_over = True
         self.dealerPlays()
+        self.checkForWinner()
 
     def dealerPlays(self):
         while self.calcScore(self.dealerhand) < 17:

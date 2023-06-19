@@ -33,12 +33,13 @@ class Games(commands.Cog):
         
         close_connection(conn)
 
-        bj = Blackjack(interaction.user, bet)
+        bj = Blackjack(interaction.user)
 
         if bj.winner == interaction.user:
-            await interaction.response.send_message(f"You got a natural blackjack! You win {bet} ergicoins!")
+            nat_bet = int(bet*1.5)
+            await interaction.response.send_message(f"You got a natural blackjack! You win {nat_bet} ergicoins!")
             conn = create_connection()
-            update_user_money(conn, userid, user_money + bet)
+            update_user_money(conn, userid, user_money + nat_bet)
             close_connection(conn)
         elif bj.winner == "Push":
             await interaction.response.send_message(f"You matched the dealer, push.")

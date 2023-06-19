@@ -58,7 +58,7 @@ class Database(commands.Cog):
 
                 await interaction.response.send_message(f'Successfully stored `{key}`!')
             elif entry:
-                if utils.is_url(entry):  # Add a function to check if the entry is a URL
+                if utils.is_url(entry):
                     # The entry is a link
                     
                     # Define the file extension
@@ -84,7 +84,7 @@ class Database(commands.Cog):
                     store_entry(conn, (username, userid, date, entry, key, file_extension, file_type, local_path, "link"))
                     select_all_links(conn)
                 else:
-                    # The entry is a text
+                    # The entry is text
 
                     # Store the text entry to the database
                     conn = create_connection()
