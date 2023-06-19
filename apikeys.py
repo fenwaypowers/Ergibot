@@ -8,9 +8,6 @@ def serverIdList():
         serverIdList[i] = serverIdList[i].rstrip()
         if serverIdList[i].isdigit():
             serverIdList[i] = int(serverIdList[i])
-
-    
-    print(serverIdList)
     
     return serverIdList
 
