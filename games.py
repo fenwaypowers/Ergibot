@@ -2,44 +2,56 @@ import random
 import nextcord
 
 class RpsInteractions(nextcord.ui.View):
-    def __init__(self, user):
+    def __init__(self, user, user2=None):
         super().__init__()
         self.value = None
+        self.value2 = None
         self.user = user
+        self.user2 = user2
     
     @nextcord.ui.button(style=nextcord.ButtonStyle.secondary, label="Rock", emoji="🪨")
     async def rock(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
-        if interaction.user.id == self.user.id:
-            self.value = "r"
-            self.stop()
-    
+        await self.process_interaction("r", interaction)
+
     @nextcord.ui.button(style=nextcord.ButtonStyle.secondary, label="Paper", emoji="📰")
     async def paper(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
-        if interaction.user.id == self.user.id:
-            self.value = "p"
-            self.stop()
+        await self.process_interaction("p", interaction)
 
     @nextcord.ui.button(style=nextcord.ButtonStyle.secondary, label="Scissors", emoji="✂")
     async def scissors(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
-        if interaction.user.id == self.user.id:
-            self.value = "s"
+        await self.process_interaction("s", interaction)
+    
+    async def process_interaction(self, value, interaction):
+        if interaction.user.id == self.user.id and self.value is None:
+            self.value = value
+            # If user2 is None, stop after the first user's interaction
+            if self.user2 is None:
+                self.stop()
+        elif self.user2 is not None and interaction.user.id == self.user2.id and self.value2 is None:
+            self.value2 = value
+
+        # If both users have made a selection, stop the view
+        if self.user2 is not None and self.value is not None and self.value2 is not None:
             self.stop()
 
-class Rps():
+class Rps:
 
     valid_moves = ['r', 'p', 's']
-    win_state = 0
 
-    def __init__(self, move):
+    def __init__(self, move, username=None, username2=None, move2=None):
         self.move = move[0].lower()
         self.com = random.choice(self.valid_moves)
+        self.move2 = move2[0].lower() if move2 else None
         self.win_RPS()
+        self.username = username
+        self.username2 = username2
 
-    def rps(self, bet):
+    def rps(self, bet, user2=None):
+        if bet < 0:
+            return "Invalid Bet"
+
         move = self.move[0].lower()
-        
-        com_move = random.choice(self.valid_moves)
-
+        other_move = self.move2 if user2 else self.com
         state = self.win_state
 
         pretty_print = {
@@ -48,21 +60,39 @@ class Rps():
             's' : 'Scissors'
         }
 
-        if state == 0:
-            return f"A problem occured."
-        if state == 1:
-            return f"Tie! We both went {pretty_print[move]}!"
-        elif state == 2:
-            return f"You went {pretty_print[move]}, and I went {pretty_print[com_move]}. You win {bet} ergicoin!"
-        elif state == 3:
-            return f"You went {pretty_print[move]}, and I went {pretty_print[com_move]}. You lose {bet} ergicoin."
+        if self.move2 == None:
+            if state == 0:
+                return f"A problem occured."
+            if state == 1:
+                return f"Tie! We both went {pretty_print[move]}!"
+            elif state == 2:
+                return f"You went {pretty_print[move]}, and I went {pretty_print[other_move]}. You win {bet} ergicoin!"
+            elif state == 3:
+                return f"You went {pretty_print[move]}, and I went {pretty_print[other_move]}. You lose {bet} ergicoin."
+        else:
+            if state == 0:
+                return f"A problem occured."
+            if state == 1:
+                return f"Tie! {self.username} and {self.username2} both went {pretty_print[move]}!"
+            elif state == 2:
+                return f"{self.username} went {pretty_print[move]}, and {self.username2} went {pretty_print[other_move]}. {self.username} wins {bet} ergicoin!"
+            elif state == 3:
+                return f"{self.username} went {pretty_print[move]}, and {self.username2} went {pretty_print[other_move]}. {self.username2} wins {bet} ergicoin!"
+
+    def pvp(self):
+        if not self.move2:
+            return "Error: Player 2 not found"
+        return self.rps(0, user2=True)  # Zero bet for player vs player. Change as required.
 
     def win_RPS(self):
         move = self.move
+        move2 = self.move2
         if move not in self.valid_moves:
-            return # win_state stays 0
+            self.win_state = 0
+            return
+
+        com_move = move2 if move2 else self.com
         
-        com_move = self.com
         beats = {
             'r' : 's',
             'p' : 'r',
@@ -70,11 +100,11 @@ class Rps():
         }
 
         if move == com_move:
-            self.win_state = 1 # Tie state
+            self.win_state = 1  # Tie state
         elif beats[move] == com_move:
-            self.win_state = 2 # Player won
+            self.win_state = 2  # Player1 won
         else:
-            self.win_state = 3 # Player loses
+            self.win_state = 3  # Player1 loses
 
 class BjInteractions(nextcord.ui.View):
     def __init__(self, user):

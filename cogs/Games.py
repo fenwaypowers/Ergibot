@@ -83,43 +83,83 @@ class Games(commands.Cog):
                 update_user_money(conn, userid, user_money - bet)
                 close_connection(conn)
 
-    @nextcord.slash_command(name = "rps", description = "Play Rock Paper Scissors with the bot!", guild_ids=serverIdList)
-    async def rps(self, interaction: Interaction, bet: int = 0):
+    @nextcord.slash_command(name = "rps", description = "Play Rock Paper Scissors with the bot or someone else!", guild_ids=serverIdList)
+    async def rps(self, interaction: Interaction, bet: int = 0, user2: nextcord.Member = None):
         conn = create_connection()
 
+        # Check if the user is in the money table
         userid = str(interaction.user.id)
         username = interaction.user.name
-
+            
         # Check if the user has enough money to bet
+        initialize_user_money(conn, username, userid)
         user_money = get_user_money(conn, userid, username)
         if validate_bet(user_money, bet):
             await interaction.response.send_message("You don't have enough coins to make that bet, or you used a negative value.")
             close_connection(conn)
             return
+        
+        # Check if the second user exists, then intialize player
+        view = RpsInteractions(interaction.user, user2)
 
-        view = RpsInteractions(interaction.user)
+        if user2 != None:
+            user2id = str(user2.id)
+            username2 = user2.name
 
-        await interaction.response.send_message("Choose Rock, Paper, or Scissors:", view=view)
-        await view.wait()
 
-        if view.value is None:
-            await interaction.channel.send("Nothing chosen.")
-            return
-        elif view.value:
+            initialize_user_money(conn, username2, user2id)
 
-            # Start a game of RPS
-            game = Rps(view.value)
-            result = game.rps(bet)
-
-            # Handle the bet
-            if game.win_state == 2:  # Player won
-                update_user_money(conn, userid, user_money + bet)
-            elif game.win_state == 3:  # Player lost
-                update_user_money(conn, userid, user_money - bet)
+            user2_money = get_user_money(conn, user2id, username)
+            if validate_bet(user2_money, bet):
+                await interaction.response.send_message("The second user don't have enough coins to accept that bet, or you used a negative value.")
+                close_connection(conn)
+                return
             
-            await interaction.channel.send(result)
+            await interaction.response.send_message(f"{interaction.user.mention} has challenged you, {user2.mention} to Rock Paper Scissors!\nThe bet is {bet}. By clicking a button, you accept the bet.", view=view)
+            
+            await view.wait()
 
-        close_connection(conn)
+            if view.value is None or view.value2 is None:
+                await interaction.channel.send("Nothing chosen.")
+                return
+            elif view.value and view.value2:
+
+                # Start a game of RPS
+                game = Rps(view.value, username, username2, view.value2)
+                result = game.rps(bet, user2)
+
+                # Handle the bet
+                if game.win_state == 2:  # Player1 won
+                    update_user_money(conn, userid, user_money + bet)
+                    update_user_money(conn, user2id, user2_money - bet)
+                elif game.win_state == 3:  # Player1 lost
+                    update_user_money(conn, userid, user_money - bet)
+                    update_user_money(conn, user2id, user2_money + bet)
+                
+                await interaction.channel.send(result)
+        else:
+
+            await interaction.response.send_message("Choose Rock, Paper, or Scissors:", view=view)
+            await view.wait()
+
+            if view.value is None:
+                await interaction.channel.send("Nothing chosen.")
+                return
+            elif view.value:
+                
+                # Start a game of RPS
+                game = Rps(view.value)
+                result = game.rps(bet)
+
+                # Handle the bet
+                if game.win_state == 2:  # Player won
+                    update_user_money(conn, userid, user_money + bet)
+                elif game.win_state == 3:  # Player lost
+                    update_user_money(conn, userid, user_money - bet)
+                
+                await interaction.channel.send(result)
+
+            close_connection(conn)
 
     @nextcord.slash_command(name = "wallet", description = "Show how many ergicoins a user has in wallet.", guild_ids=serverIdList)
     async def wallet(self, interaction: Interaction, member: nextcord.Member=None):
