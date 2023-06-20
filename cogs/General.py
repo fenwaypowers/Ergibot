@@ -34,7 +34,7 @@ The bot was originally written in 2020, but as of 2023 has been completely re-wr
         else:
             await interaction.response.send_message("Command failed.")
 
-    @nextcord.slash_command(name = "joe", description = "Displays a random image of Joe.", guild_ids=['912896088439160882'])
+    @nextcord.slash_command(name = "joe", description = "Displays a random image of Joe.", guild_ids=[912896088439160882])
     async def joe(self, interaction: Interaction):
         path = "db/joe"
         if os.path.exists(path):
