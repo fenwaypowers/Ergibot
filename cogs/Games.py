@@ -24,13 +24,13 @@ class Games(commands.Cog):
 
         initialize_user_money(conn, interaction.user.name, interaction.user.id)
 
-        # Check if the user has enough money to bet
+        # Check if the user has enough money to bet and bet is positive
         user_money = get_user_money(conn, userid, username)
-        if validate_bet(user_money, bet):
+        if bet < 0 or validate_bet(user_money, bet):
             await interaction.response.send_message("You don't have enough coins to make that bet, or you used a negative value.")
             close_connection(conn)
             return
-        
+
         close_connection(conn)
 
         bj = Blackjack(interaction.user)
@@ -91,10 +91,10 @@ class Games(commands.Cog):
         user_id = str(interaction.user.id)
         user_name = interaction.user.name
             
-        # Check if the user has enough money to bet
+        # Check if the user has enough money to bet and bet is positive
         initialize_user_money(conn, user_name, user_id)
         user_money = get_user_money(conn, user_id, user_name)
-        if validate_bet(user_money, bet):
+        if bet < 0 or validate_bet(user_money, bet):
             await interaction.response.send_message("You don't have enough coins to make that bet, or you used a negative value.")
             close_connection(conn)
             return
@@ -180,14 +180,45 @@ class Games(commands.Cog):
     async def transfer(self, interaction: Interaction, member: nextcord.Member, amount: int):
         conn = create_connection()
 
+        # Add check to ensure amount is positive
+        if amount < 0:
+            await interaction.response.send_message("Error: Amount must be a positive number.")
+            close_connection(conn)
+            return
+
         initialize_user_money(conn, member.name, member.id)
         initialize_user_money(conn, interaction.user.name, interaction.user.id)
         
         if transfer_coins(conn, interaction.user.id, member.id, amount):
             await interaction.response.send_message(f"{interaction.user.name}, you have successfully sent {amount} ergicoins to {member.name}.")
         else:
-            await interaction.response.send_message(f"Error occured during transfer. Please make sure that after the transfer you will have a minimum of 1000 ergicoins.")
+            await interaction.response.send_message(f"Error occurred during transfer. Please make sure that after the transfer you will have a minimum of 1000 ergicoins.")
         close_connection(conn)
+
+    @nextcord.slash_command(name = "leaderboard", description = "Show the top 5 users with the most coins", guild_ids=serverIdList)
+    async def leaderboard(self, interaction: Interaction):
+        conn = create_connection()
+        try:
+            # Fetch top 5 users with the highest coins
+            cursor = conn.cursor()
+            cursor.execute("SELECT username, coins FROM money ORDER BY coins DESC LIMIT 5")
+            top_users = cursor.fetchall()
+
+            # Build leaderboard message
+            if len(top_users) == 0:
+                leaderboard_message = "No users found in the database."
+            else:
+                leaderboard_message = "Top users:\n"
+                for i, user in enumerate(top_users, start=1):
+                    leaderboard_message += f"{i}. {user[0]}: {user[1]} coins\n"
+
+            await interaction.response.send_message(leaderboard_message)
+        except Exception as e:
+            await interaction.response.send_message("An error occurred while fetching the leaderboard.")
+            print(f"Error: {e}")
+        finally:
+            close_connection(conn)
+
 
 def setup(client):
     client.add_cog(Games(client))

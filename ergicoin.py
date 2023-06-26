@@ -41,7 +41,7 @@ def get_user_money(conn, userid, username=None):
     money = cur.fetchone()
 
     if money[0] == 0:
-        update_user_money(conn, userid, 0)
+        update_user_money(conn, userid, 1000)
         return 1000
     elif money is not None:
         return money[0]
