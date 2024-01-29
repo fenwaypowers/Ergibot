@@ -178,10 +178,10 @@ class Blackjack():
         self.dealerhand.append(self.pickCard())
 
     def startGame(self):
-        for i in range(0, 2):
+        for _ in range(0, 2):
             self.playerPick()
         
-        for i in range(0, 2):
+        for _ in range(0, 2):
             self.dealerPick()
 
         self.checkForWinner()

@@ -13,6 +13,8 @@ Updated for 2024 with new slash commands, using [nextcord](https://github.com/ne
 - copy `config.example.cfg` to `config.cfg` and adjust the configuration
 - run `python3 main.py`
 
+- In the discord developer portal, on your bot's page, enable all "Privileged Gateway Intents"
+
 ## Command Line Arguments
 ```
 usage: main.py [-h] [--config CONFIG]
