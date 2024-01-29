@@ -27,27 +27,6 @@ options:
 
 ## Features Implemented
 
-* Role reaction monitor abilities.
-* Simple commands for public use such as /wiki and /website.
-
-## Code Structure
-
-* `main.py` creates a cogs list to use the modules in `cogs/`.
-* `utils.py` is for json loading and saving utils.
-* `apikeys.py` is for loading api keys and server Ids.
-* cog modules explained below.
-
-## Admin.py
-
-* For admin commands, such as `/botsay`.
-* Full role monitoring and adding role monitors.
-* Only users with the admin role (as specified in the cfg) can use these commands.
-
-## Greetings.py
-
-* For `on_member_update()` functionality.
-* Gives the "Friends" role to new members who pass the rules screening.
-
-## General.py
-
-* For general public use functions such as retrieval of commonly used links.
+* SQLite db for currency, files, text, and links
+* Games: RPS and Blackjack
+* Kevin and Joe commands

@@ -1,7 +1,6 @@
 import nextcord
 from nextcord.ext import commands
 from nextcord import Interaction
-from nextcord.ext import application_checks
 from nextcord.utils import get
 import os
 import utils
