@@ -1,13 +1,10 @@
 import nextcord
 from nextcord.ext import commands
-from nextcord import Interaction
-from nextcord.ext import application_checks
-import os, sys
-import apikeys
+import globals
 
 class Greetings(commands.Cog):
 
-    serverIdList = apikeys.serverIdList()
+    serverIdList = globals.config.servers.server_list
             
     def __init__(self, client):
         self.client = client

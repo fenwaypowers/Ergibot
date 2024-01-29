@@ -2,32 +2,26 @@ import nextcord
 from nextcord.ext import commands
 from nextcord import Interaction
 from nextcord.ext import application_checks
-import os, sys
-import apikeys
-from database import *
+import os
+import argparse
+from config import load_config, Config
+import globals
 
-if not os.path.exists('db'):
-    os.mkdir('db')
+from config import Config
 
-if not os.path.exists('keys'):
-    os.mkdir('keys')    
+SCRIPT_PATH = os.path.abspath(os.path.dirname(__file__))
+DEFAULT_CFG_PATH = os.path.join(SCRIPT_PATH, "config.cfg")
 
-if not os.path.exists('keys/discord.txt') or not os.path.exists('keys/serverids.txt'):
-    print('''Please initialize the keys/ directory with discord.txt and serverids.txt.
-    Put your Discord API key into discord.txt.
-    Put the ID of the servers you want to allow the bot to message in serverids.txt.
-    Therefore, you should have these files:
-        keys/discord.txt
-        keys/serverids.txt''')
-    sys.exit(1)
+parser = argparse.ArgumentParser(description="Ergibot.")
+parser.add_argument('--config', '-c', help='Path to ergibot config file.', default=DEFAULT_CFG_PATH)
 
-print("Running Ergibot...")
+args = parser.parse_args()
+path_to_cfg = args.config
+config: Config = load_config(path_to_cfg)
+globals.config = config
 
-conn = create_connection()
-close_connection(conn)
-
-serverIdList = apikeys.serverIdList()
-BOTTOKEN = apikeys.discordApiKey()
+serverIdList = config.servers.server_list
+BOTTOKEN = config.api.key
 
 intents = nextcord.Intents.all() # VITAL that this is .all()
 

@@ -1,4 +1,4 @@
-import json, os
+import json
 from urllib.parse import urlparse
 
 def is_url(string):
@@ -9,19 +9,18 @@ def is_url(string):
         return False
 
 def save_json(file: str, data: dict):
-    "removes old file and then replaces it with fresh data @tpowell11"
-    os.remove(file)  # delete outdated data
-    dumpData = json.dumps(data)
-    with open(file, 'w') as f:  # open file
-        f.write(dumpData)  # write the new json
-        f.close()
+    """
+    Saves data to a JSON file, overwriting existing content.
+    """
+    with open(file, 'w') as f:
+        json.dump(data, f)
 
-def load_json(jsonfilename : str):
+def load_json(jsonfilename: str):
+    """
+    Loads data from a JSON file.
+    """
     with open(jsonfilename, 'r') as file:
-        data = file.read()
-        output = json.loads(data)
-        file.close()
-    return output
+        return json.load(file)
 
 def save_and_load_json(jsonfilename: str, data: dict):
     save_json(jsonfilename, data)

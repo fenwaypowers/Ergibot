@@ -1,16 +1,14 @@
 import nextcord
 from nextcord.ext import commands
 from nextcord import Interaction
-from nextcord.ext import application_checks
 from nextcord.utils import get
-import os, sys
-import apikeys, utils
+import globals
 from database import *
 from ergicoin import *
 from games import *
 
 class Games(commands.Cog):
-    serverIdList = apikeys.serverIdList()
+    serverIdList = globals.config.servers.server_list
 
     def __init__(self, client):
         self.client = client
@@ -218,7 +216,6 @@ class Games(commands.Cog):
             print(f"Error: {e}")
         finally:
             close_connection(conn)
-
 
 def setup(client):
     client.add_cog(Games(client))

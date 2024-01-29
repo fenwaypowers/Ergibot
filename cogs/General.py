@@ -1,13 +1,12 @@
 import nextcord
 from nextcord.ext import commands
 from nextcord import Interaction
-from nextcord.ext import application_checks
 from nextcord.utils import get
-import os, sys
-import apikeys, utils, random
+import os
+import globals, random
 
 class General(commands.Cog):
-    serverIdList = apikeys.serverIdList()
+    serverIdList = globals.config.servers.server_list
 
     def __init__(self, client):
         self.client = client

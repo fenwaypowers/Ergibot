@@ -3,15 +3,16 @@ from nextcord.ext import commands
 from nextcord import Interaction
 from nextcord.ext import application_checks
 from nextcord.utils import get
-import os, sys
-import apikeys, utils
+import os
+import utils
 import aiohttp
 import datetime
+import globals
 from database import *
 from typing import Optional
 
 class Database(commands.Cog):
-    serverIdList = apikeys.serverIdList()
+    serverIdList = globals.config.servers.server_list
 
     def __init__(self, client):
         self.client = client
