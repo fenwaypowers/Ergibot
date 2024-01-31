@@ -32,3 +32,7 @@ options:
 * SQLite db for currency, files, text, and links
 * Games: RPS and Blackjack
 * Kevin and Joe commands
+
+## Chatbot Feature
+* uses [ollama](https://github.com/ollama/ollama) on a remote machine to run prompts into a LLM.
+* very specific to my exact setup, so you can disable this command with the config file.

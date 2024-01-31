@@ -31,6 +31,10 @@ initial_extensions = []
 
 for filename in os.listdir("./cogs"):
     if filename.endswith(".py"):
+        if "Chatbot" in filename:
+            if not config.chatbot.enabled:
+                print("Chatbot disabled.")
+                continue
         initial_extensions.append("cogs." + filename[:-3])
 
 if __name__ == '__main__':
